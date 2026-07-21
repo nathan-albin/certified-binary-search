@@ -18,6 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
-      - uses: leanprover-community/docgen-action@v1
+      - uses: leanprover-community/docgen-action@10db47458f91456d87804787d3dfcd914b9a19e3 # main, includes build-page input
         with:
           build-page: false
