@@ -157,4 +157,20 @@ theorem binarySearch_none (arr : Array Nat) (target low high : Nat) (hhigh : hig
     · exact hrange hleft
     · exact hrange' hright
 
+/-- Extra correctness check. In case InRange is somehow misleading, this theorem
+provides a more direct way of stating that if `target` is in the array, then the
+search returns an index where it is found. -/
+theorem binarySearch_finds (arr : Array Nat) (target : Nat)
+  (hsorted : Sorted arr) (h_contains : target ∈ arr) :
+  ∃ (i : Nat), binarySearch arr target 0 arr.size arr.size.le_refl = some i := by
+    classical
+    have h_in_range : InRange arr target 0 arr.size := by
+      unfold InRange
+      obtain ⟨i, hi, htarget⟩ := Array.mem_iff_getElem.mp h_contains
+      exact ⟨i, hi, i.zero_le, hi, htarget⟩
+    rcases hb : binarySearch arr target 0 arr.size arr.size.le_refl with _ | i
+    · exact absurd h_in_range (binarySearch_none arr target 0 arr.size arr.size.le_refl hsorted hb)
+    · obtain ⟨hi, htarget⟩ := binarySearch_some arr target 0 arr.size arr.size.le_refl i hb
+      exact ⟨i, rfl⟩
+
 end BinarySearch

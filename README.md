@@ -65,7 +65,7 @@ theorem binarySearch_none (arr : Array Nat) (target low high : Nat) (hhigh : hig
 
 It's important to keep in mind that, while Lean can check the correctness of a
 proof, it can't check that the proof actually means what we think it means. This
-example shows that there is still a reasoning gap separating what Lean can prove
+example shows that there is still a conceptual gap separating what Lean can prove
 and what we can logically conclude about the algorithm. An example is provided
 in [Fake.lean](BinarySearch/Fake.lean).
 
@@ -102,10 +102,26 @@ should return `some i`. The `fakeSearch` implementation clearly does not have
 this property, since it can never return `some i`, so you wouldn't be able to
 prove that part in Lean.
 
+## Supporting Our Reasoning
+
 If you look back at the correct algorithm, you'll see that there was some
 higher-order reasoning involved in thinking about that proof as well. Notice,
 for example, that we didn't explicitly prove the statement that if `arr[i] =
 target` for some index `i`, then the algorithm returns `some i`. Instead, we
 proved the contrapositive: if the algorithm returns `none`, then `target` is not
-in the range. Understanding why that is sufficient to prove correctness is
-reasoning that happens outside the Lean code.
+in the range.
+
+We can prove an additional theorem that captures this more directly:
+
+```lean
+theorem binarySearch_finds (arr : Array Nat) (target : Nat)
+  (hsorted : Sorted arr) (h_contains : target ∈ arr) :
+  ∃ (i : Nat), binarySearch arr target 0 arr.size arr.size.le_refl = some i
+```
+
+This is a little easier to interpret than the `none` case of the correctness
+proof. It says more directly that if the array is sorted and contains the
+target, then running a search over the whole array will return `some i`. From
+the `some` case of the correctness proof, we'll be able to conclude that `arr[i]
+= target`. Nevertheless, no matter how many theorems we prove, there will always
+be a gap we have to fill ourselves with reasoning and logic.
