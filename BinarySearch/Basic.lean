@@ -19,13 +19,13 @@ if hlh : low ≥ high then
   none
 else
   let mid := (low + high) / 2
-  have hmid : mid < arr.size := by grind
+  have hmid : mid < arr.size := by omega
   if arr[mid] = target then
     some  mid
   else if arr[mid] < target then
     binarySearch arr target (mid+1) high hhigh
   else
-    binarySearch arr target low mid (le_of_lt hmid)
+    binarySearch arr target low mid hmid.le
 
 def testArray : Array Nat := #[1, 3, 5, 7, 9]
 
@@ -103,8 +103,7 @@ theorem binarySearch_none (arr : Array Nat) (target low high : Nat) (hhigh : hig
     rw [InRange]
     by_contra hc
     obtain ⟨i, hi, hlow, hhigh', htarget⟩ := hc
-    have hlh' : ¬ low ≥ high := by omega
-    contradiction
+    omega
   | case2 low high hhigh hlh mid hmid htarget=>
     unfold binarySearch at h
     dsimp only at h
