@@ -33,6 +33,19 @@ def testArray : Array Nat := #[1, 3, 5, 7, 9]
 #eval binarySearch testArray 2 0 testArray.size (by decide) -- should return none
 #eval binarySearch testArray 9 0 testArray.size (by decide) -- should return some 4
 
+set_option linter.hashCommand false in
+#guard binarySearch testArray 5 0 testArray.size (by decide) == some 2
+set_option linter.hashCommand false in
+#guard binarySearch testArray 2 0 testArray.size (by decide) == none
+set_option linter.hashCommand false in
+#guard binarySearch testArray 9 0 testArray.size (by decide) == some 4
+set_option linter.hashCommand false in
+#guard binarySearch testArray 1 0 testArray.size (by decide) == some 0
+set_option linter.hashCommand false in
+#guard binarySearch testArray 0 0 testArray.size (by decide) == none
+set_option linter.hashCommand false in
+#guard binarySearch testArray 10 0 testArray.size (by decide) == none
+
 /-- An array is sorted if it is in non-decreasing order. -/
 def Sorted (arr : Array Nat) : Prop :=
   ∀ i j (hi : i < arr.size) (hj : j < arr.size), i < j → arr[i] ≤ arr[j]
