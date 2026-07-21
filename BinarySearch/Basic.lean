@@ -163,7 +163,6 @@ search returns an index where it is found. -/
 theorem binarySearch_finds (arr : Array Nat) (target : Nat)
   (hsorted : Sorted arr) (h_contains : target ∈ arr) :
   ∃ (i : Nat), binarySearch arr target 0 arr.size arr.size.le_refl = some i := by
-    classical
     have h_in_range : InRange arr target 0 arr.size := by
       unfold InRange
       obtain ⟨i, hi, htarget⟩ := Array.mem_iff_getElem.mp h_contains
