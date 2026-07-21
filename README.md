@@ -16,7 +16,7 @@ def binarySearch (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size) : Option Nat
 ```
 
-It takes an array of natural numbers, `arr`, a `target` value to search for, two indices, `low` and `high`, that define the search range of indices `[low, high)`, along with a proof that all indices in the range are in bounds. It returns `some i` if it finds `target` at index `i`, or `none` if it does not find `target`.
+It takes an array of natural numbers, `arr`, a `target` value to search for, two indices, `low` and `high`, that define the search range of indices `[low, high)`, along with a proof that `high ≤ arr.size` (which guarantees every index in the range is in bounds). It returns `some i` if it finds `target` at index `i`, or `none` if it does not find `target`.
 
 > [!IMPORTANT]
 > The search algorithm does not require the array to be sorted; however, the
@@ -84,8 +84,11 @@ theorem fakeSearch_correct (arr : Array Nat) (target low high : Nat) (hhigh : hi
 ```
 
 It says what we would hope it would say: if the search returns `some i`, then
-`arr[i]` is equal to `target`. (The proof is trivial because any statement about
-the empty set is vacuously true.) The problem is that it looks like a
+`arr[i]` is equal to `target`. (The proof is trivial because the hypothesis `h`
+asserts an impossible equality: `fakeSearch` always returns `none`, so `h`
+claims `none = some i`, which can never happen. Since the hypothesis can never
+be satisfied, the implication is vacuously true no matter what it concludes.)
+The problem is that it looks like a
 correctness proof; the theorem's name even has the word "correct" in it.
 Probably this wouldn't get past a mathematician or computer scientist who is
 paying attention, but it's a small-scale example of how we still need to apply
