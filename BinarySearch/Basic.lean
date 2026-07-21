@@ -27,24 +27,20 @@ else
   else
     binarySearch arr target low mid hmid.le
 
-def testArray : Array Nat := #[1, 3, 5, 7, 9]
-
-#eval binarySearch testArray 5 0 testArray.size (by decide) -- should return some 2
-#eval binarySearch testArray 2 0 testArray.size (by decide) -- should return none
-#eval binarySearch testArray 9 0 testArray.size (by decide) -- should return some 4
+def testArray : Array Nat := #[1, 3, 5, 7, 7, 9]
 
 set_option linter.hashCommand false in
 #guard binarySearch testArray 5 0 testArray.size (by decide) == some 2
 set_option linter.hashCommand false in
 #guard binarySearch testArray 2 0 testArray.size (by decide) == none
 set_option linter.hashCommand false in
-#guard binarySearch testArray 9 0 testArray.size (by decide) == some 4
+#guard binarySearch testArray 9 0 testArray.size (by decide) == some 5
 set_option linter.hashCommand false in
 #guard binarySearch testArray 1 0 testArray.size (by decide) == some 0
 set_option linter.hashCommand false in
 #guard binarySearch testArray 0 0 testArray.size (by decide) == none
 set_option linter.hashCommand false in
-#guard binarySearch testArray 10 0 testArray.size (by decide) == none
+#guard binarySearch testArray 7 0 testArray.size (by decide) == some 3
 
 /-- An array is sorted if it is in non-decreasing order. -/
 def Sorted (arr : Array Nat) : Prop :=
