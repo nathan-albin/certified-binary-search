@@ -1,10 +1,15 @@
 # Certified Binary Search
 
-Simple implementation of binary search in Lean along with a correctness proof.
+Some experiments with correctness proofs in Lean. This repo contains a simple
+implementation of a binary search algorithm along with a correctness proof. The
+repo also includes a **cautionary non-example**: an incorrect binary search
+algorithm along with something that might accidentally be mistaken for a
+correctness proof.
 
 ## Algorithm
 
-The algorithm has the call signature:
+The algorithm and its correctness proof are found in
+[Basic.lean](BinarySearch/Basic.lean). The algorithm has the call signature:
 
 ```lean
 def binarySearch (arr : Array Nat) (target low high : Nat)
@@ -55,3 +60,49 @@ theorem binarySearch_none (arr : Array Nat) (target low high : Nat) (hhigh : hig
   (hsorted : Sorted arr) (h : binarySearch arr target low high hhigh = none) :
   ¬ InRange arr target low high
 ```
+
+## Non-Example
+
+It's important to keep in mind that, while Lean can check the correctness of a
+proof, it can't check that the proof actually means what we think it means. This
+example shows that there is still a reasoning gap separating what Lean can prove
+and what we can logically conclude about the algorithm. An example is provided
+in [Fake.lean](BinarySearch/Fake.lean).
+
+The search implementation there is absurd: it just always returns `none`. (The
+linter warnings have been disabled for this example; in the real world, these
+warnings would be a huge red flag that something is wrong. But we can't rely on
+the linter to catch all of our logic errors.)
+
+The "correctness theorem" looks identical to the `some` version of the true
+algorithm.
+
+```lean
+theorem fakeSearch_correct (arr : Array Nat) (target low high : Nat) (hhigh : high ≤ arr.size)
+  (i : Nat) (h : fakeSearch arr target low high hhigh = some i) :
+  ∃ (hi : i < arr.size), arr[i] = target
+```
+
+It says what we would hope it would say: if the search returns `some i`, then
+`arr[i]` is equal to `target`. (The proof is trivial because any statement about
+the empty set is vacuously true.) The problem is that it looks like a
+correctness proof; the theorem's name even has the word "correct" in it.
+Probably this wouldn't get past a mathematician or computer scientist who is
+paying attention, but it's a small-scale example of how we still need to apply
+reasoning and logic, even when using a proof assistant like Lean.
+
+In this case, a careful reader would notice that the correctness proof is
+incomplete. It only shows one direction of the implication: if the algorithm
+returns `some i`, then `arr[i] = target`. For correctness, though, we also need
+the other direction: if `arr[i] = target` for some index `i`, then the algorithm
+should return `some i`. The `fakeSearch` implementation clearly does not have
+this property, since it can never return `some i`, so you wouldn't be able to
+prove that part in Lean.
+
+If you look back at the correct algorithm, you'll see that there was some
+higher-order reasoning involved in thinking about that proof as well. Notice,
+for example, that we didn't explicitly prove the statement that if `arr[i] =
+target` for some index `i`, then the algorithm returns `some i`. Instead, we
+proved the contrapositive: if the algorithm returns `none`, then `target` is not
+in the range. Understanding why that is sufficient to prove correctness is
+reasoning that happens outside the Lean code.
