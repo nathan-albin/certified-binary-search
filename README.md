@@ -98,16 +98,16 @@ In this case, a careful reader would notice that the correctness proof is
 incomplete. It only shows one direction of the implication: if the algorithm
 returns `some i`, then `arr[i] = target`. For correctness, though, we also need
 the other direction: if `arr[i] = target` for some index `i`, then the algorithm
-should return `some i`. The `fakeSearch` implementation clearly does not have
-this property, since it can never return `some i`, so you wouldn't be able to
-prove that part in Lean.
+should return `some i'`  (possibly not the same index). The `fakeSearch`
+implementation clearly does not have this property, since it can never return
+`some i`, so you wouldn't be able to prove that part in Lean.
 
 ## Supporting Our Reasoning
 
 If you look back at the correct algorithm, you'll see that there was some
 higher-order reasoning involved in thinking about that proof as well. Notice,
 for example, that we didn't explicitly prove the statement that if `arr[i] =
-target` for some index `i`, then the algorithm returns `some i`. Instead, we
+target` for some index `i`, then the algorithm returns `some i'`. Instead, we
 proved the contrapositive: if the algorithm returns `none`, then `target` is not
 in the range.
 
@@ -119,9 +119,10 @@ theorem binarySearch_finds (arr : Array Nat) (target : Nat)
   ∃ (i : Nat), binarySearch arr target 0 arr.size arr.size.le_refl = some i
 ```
 
-This is a little easier to interpret than the `none` case of the correctness
-proof. It says more directly that if the array is sorted and contains the
-target, then running a search over the whole array will return `some i`. From
-the `some` case of the correctness proof, we'll be able to conclude that `arr[i]
-= target`. Nevertheless, no matter how many theorems we prove, there will always
-be a gap we have to fill ourselves with reasoning and logic.
+(You'll find the proof in `Basic.lean`.)This is a little easier to interpret than
+the `none` case of the correctness proof. It says more directly that if the
+array is sorted and contains the target, then running a search over the whole
+array will return `some i`. From the `some` case of the correctness proof, we'll
+be able to conclude that `arr[i] = target`. Nevertheless, no matter how many
+theorems we prove, there will always be a gap we have to fill ourselves with
+reasoning and logic.
