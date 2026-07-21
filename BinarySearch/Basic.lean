@@ -14,7 +14,7 @@ namespace BinarySearch
   either return an index `some i` such that `i ∈ [low,high)` and `arr[i] =
   target` or `none` if no such index exists. -/
 def binarySearch (arr : Array Nat) (target low high : Nat)
-(hhigh : high ≤ arr.size) : Option Nat :=
+  (hhigh : high ≤ arr.size) : Option Nat :=
 if hlh : low ≥ high then
   none
 else
