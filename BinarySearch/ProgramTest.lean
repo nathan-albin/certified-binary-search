@@ -1,17 +1,11 @@
-import BinarySearch.IR
 import BinarySearch.Interp
-import BinarySearch.Program
+import BinarySearch.ProgramDriver
 
 /-! Tests for the IR binary search program-/
 
 namespace BinarySearch.ProgramTest
 
-open BinarySearch.IR BinarySearch.Interp BinarySearch.Program
-
-def binarySearch (arr : Array Nat) (target : Nat) (low high : Nat) : Result :=
-  let env := Environment.mk arr target
-  let state := State.mk low high 0
-  interp env state (10*arr.size) binarySearchIR
+open BinarySearch.ProgramDriver open BinarySearch.Interp
 
 def testArray : Array Nat := #[1, 3, 5, 7, 7, 9]
 
