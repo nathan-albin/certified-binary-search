@@ -20,3 +20,7 @@ name = "BinarySearch"
 [[lean_exe]]
 name = "emit_cpp"
 root = "EmitCppMain"
+
+[[lean_exe]]
+name = "emit_rust"
+root = "EmitRustMain"

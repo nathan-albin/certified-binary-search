@@ -1,6 +1,8 @@
 import BinarySearch.Basic
 import BinarySearch.EmitCpp
 import BinarySearch.EmitCppProgram
+import BinarySearch.EmitRust
+import BinarySearch.EmitRustProgram
 import BinarySearch.Fake
 import BinarySearch.Interp
 import BinarySearch.IR
