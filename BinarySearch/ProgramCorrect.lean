@@ -148,12 +148,29 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
       omega
     exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
 
+theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
+  (hhigh : high ≤ arr.size)
+  (h : binarySearch arr target low high hhigh = none) :
+  ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
+  interp (Environment.mk arr target) (State.mk low high mid0)
+  fuel Program.whileBlock = Result.return_none := by
+  sorry
+
+
 theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
   (hhigh : high ≤ arr.size) :
   resultsMatch (interp (Environment.mk arr target) (State.mk low high 0)
   (ProgramDriver.fullFuel low high) Program.whileBlock)
   (binarySearch arr target low high hhigh) := by
-  sorry
+  cases h : binarySearch arr target low high hhigh with
+  | some i =>
+    have hwhile := whileBlock_finds arr target low high i hhigh h 0
+      (ProgramDriver.fullFuel low high) (by omega)
+    simp [hwhile, resultsMatch]
+  | none =>
+    have hwhile := whileBlock_none arr target low high hhigh h 0
+      (ProgramDriver.fullFuel low high) (by omega)
+    simp [hwhile, resultsMatch]
 
 /-! The main theorem: the binary search IR implementation produces the same
 result as the native Lean implementation -/
