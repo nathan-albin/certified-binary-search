@@ -278,12 +278,6 @@ theorem whileBlock_of_binarySearchIR
   unfold Program.binarySearchIR
   sorry
 
-theorem initBlock_effect (arr : Array Nat) (target : Nat) :
-  ∀ (env : Environment) (state : State) (fuel : Nat) (stmt : IR.Stmt),
-  fuel ≥ 2 → interp env state fuel (Program.initBlock ;; stmt ) =
-  interp env (State.mk 0 arr.size state.mid) (fuel - 2) stmt := by
-  sorry
-
 /-! The main theorem: the binary search IR implementation produces the same
 result as the native Lean implementation -/
 theorem binarySearch_correct (arr : Array Nat) (target : Nat) :
