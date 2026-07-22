@@ -21,3 +21,11 @@ jobs:
       - uses: leanprover-community/docgen-action@10db47458f91456d87804787d3dfcd914b9a19e3 # main, includes build-page input
         with:
           build-page: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build and run emitted C++ tests
+        run: make test-cpp
+
+      - name: Build and run emitted Rust tests
+        run: make test-rust
