@@ -8,11 +8,14 @@ namespace BinarySearch.ProgramDriver
 
 open  BinarySearch.Interp BinarySearch.Program
 
-private def C : Nat := 10
+/-- Fuel needed to execute the binary search program. Since the search has
+logarithmic complexity, this is far more than is necessary in general. -/
+def fullFuel (low high : Nat) : Nat :=
+  10 * (high - low) + 10
 
 def binarySearch (arr : Array Nat) (target : Nat) : Result :=
   let env := Environment.mk arr target
   let state := State.mk 0 0 0
-  interp env state (C*arr.size + C) binarySearchIR
+  interp env state (fullFuel 0 arr.size) binarySearchIR
 
 end BinarySearch.ProgramDriver
