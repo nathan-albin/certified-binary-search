@@ -29,18 +29,18 @@ returns its index (if it matches `target`) or narrows the interval towards
 whichever half `target` could be in, exactly mirroring one step of
 `Basic.binarySearch`'s recursion. -/
 theorem innerBlock_step (arr : Array Nat) (target low high mid fuel : Nat)
-    (hmid : (low + high) / 2 < arr.size)
+    (hmid : low + (high - low) / 2 < arr.size)
     (hfuel : fuel ≥ 4) :
     interp (Environment.mk arr target) (State.mk low high mid) fuel Program.innerBlock =
-      if arr[(low + high) / 2] = target then
-        Result.return_index ((low + high) / 2)
-      else if arr[(low + high) / 2] < target then
-        Result.success (State.mk ((low + high) / 2 + 1) high ((low + high) / 2))
+      if arr[low + (high - low) / 2] = target then
+        Result.return_index (low + (high - low) / 2)
+      else if arr[low + (high - low) / 2] < target then
+        Result.success (State.mk (low + (high - low) / 2 + 1) high (low + (high - low) / 2))
       else
-        Result.success (State.mk low ((low + high) / 2) ((low + high) / 2)) := by
-  have htargetD : arr.getD ((low + high) / 2) 0 = arr[(low + high) / 2] := by
+        Result.success (State.mk low (low + (high - low) / 2) (low + (high - low) / 2)) := by
+  have htargetD : arr.getD (low + (high - low) / 2) 0 = arr[low + (high - low) / 2] := by
     unfold Array.getD; simp [hmid]
-  have htargetD2 : arr[(low + high) / 2]?.getD 0 = arr[(low + high) / 2] := by
+  have htargetD2 : arr[low + (high - low) / 2]?.getD 0 = arr[low + (high - low) / 2] := by
     simp [hmid]
   split_ifs with h₁ h₂
   · have hn₁ : fuel ≠ 0 := by omega
@@ -125,16 +125,16 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
     simp only [hne, ↓reduceIte, hlt]
-    have h_upper : binarySearch arr target ((low + high) / 2 + 1) high hhigh = some i := by
+    have h_upper : binarySearch arr target (low + (high - low) / 2 + 1) high hhigh = some i := by
       unfold binarySearch at h
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel (low + (high - low) / 2 + 1) high := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
-    exact (ih h_upper ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+    exact (ih h_upper (low + (high - low) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
   | case4 low high hhigh hlh mid hmid hne hge ih =>
     subst mid
     intro mid0 fuel hfuel
@@ -146,16 +146,16 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
     simp only [hne, ↓reduceIte, hge]
-    have h_lower : binarySearch arr target low ((low + high) / 2) hmid.le = some i := by
+    have h_lower : binarySearch arr target low (low + (high - low) / 2) hmid.le = some i := by
       unfold binarySearch at h
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low (low + (high - low) / 2) := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
-    exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+    exact (ih h_lower (low + (high - low) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
 
 /-- If `Basic.binarySearch` does not find `target` on `[low, high)`, then
 `Program.loopBlock`, run from that same interval with any starting midpoint
@@ -191,16 +191,16 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
     simp only [hne, ↓reduceIte, hlt]
-    have h_upper : binarySearch arr target ((low + high) / 2 + 1) high hhigh = none := by
+    have h_upper : binarySearch arr target (low + (high - low) / 2 + 1) high hhigh = none := by
       unfold binarySearch at h
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel (low + (high - low) / 2 + 1) high := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
-    exact (ih h_upper ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+    exact (ih h_upper (low + (high - low) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
   | case4 low high hhigh hlh mid hmid hne hge ih =>
     subst mid
     intro mid0 fuel hfuel
@@ -212,16 +212,16 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
     simp only [hne, ↓reduceIte, hge]
-    have h_lower : binarySearch arr target low ((low + high) / 2) hmid.le = none := by
+    have h_lower : binarySearch arr target low (low + (high - low) / 2) hmid.le = none := by
       unfold binarySearch at h
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low (low + (high - low) / 2) := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
-    exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+    exact (ih h_lower (low + (high - low) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
 
 /-- If `Basic.binarySearch` finds `target` at index `i` on `[low, high)`, then
 `Program.whileBlock`, run from that same interval with enough fuel, returns

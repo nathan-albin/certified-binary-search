@@ -14,6 +14,7 @@ def emitExpr : IR.Expr → String
   | target => "target"
   | literal n => toString n
   | add e1 e2 => "(" ++ (emitExpr e1) ++ " + " ++  (emitExpr e2) ++ ")"
+  | sub e1 e2 => "(" ++ (emitExpr e1) ++ " - " ++ (emitExpr e2) ++ ")"
   | div e1 e2 => "(" ++ (emitExpr e1) ++ " / " ++ (emitExpr e2) ++ ")"
   | array_get e => "arr[" ++ (emitExpr e) ++ "]"
   | array_len => "arr.len()"

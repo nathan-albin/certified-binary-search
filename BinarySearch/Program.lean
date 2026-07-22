@@ -21,9 +21,14 @@ def splitBlock : IR.Stmt :=
     (assign high (var mid))
 
 /-- One iteration of the search: computes the midpoint, returns its index if
-it matches `target`, otherwise narrows the interval via `splitBlock`. -/
+it matches `target`, otherwise narrows the interval via `splitBlock`.
+
+The midpoint is computed as `low + (high - low) / 2` rather than
+`(low + high) / 2`, to avoid overflow in the fixed-width `size_t`/`usize`
+arithmetic used by the emitted C++ and Rust - the classic binary-search
+overflow bug. -/
 def innerBlock : IR.Stmt :=
-  declare mid (div (add (var low) (var high)) (literal 2)) ;;
+  declare mid (add (var low) (div (sub (var high) (var low)) (literal 2))) ;;
   if_then (equal (array_get (var mid)) target)
     (return_index (var mid))
     (splitBlock)

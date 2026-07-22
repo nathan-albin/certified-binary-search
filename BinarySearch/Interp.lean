@@ -43,6 +43,7 @@ def evalExpr (env : Environment) (state : State) : IR.Expr → Nat
   | target => env.target
   | literal n => n
   | add e1 e2 => (evalExpr env state e1) + (evalExpr env state e2)
+  | sub e1 e2 => (evalExpr env state e1) - (evalExpr env state e2)
   | div e1 e2 => (evalExpr env state e1) / (evalExpr env state e2)
   | array_get e => env.arr.getD (evalExpr env state e) 0
   | array_len => env.arr.size

@@ -22,6 +22,9 @@ inductive Expr where
   | literal : Nat → Expr
   /-- Addition of two expressions. -/
   | add : Expr → Expr → Expr
+  /-- Truncated subtraction of two expressions (`0` if the second exceeds the
+  first). -/
+  | sub : Expr → Expr → Expr
   /-- Natural-number (floor) division of two expressions. -/
   | div : Expr → Expr → Expr
   /-- Reads the array at the index given by an expression. -/

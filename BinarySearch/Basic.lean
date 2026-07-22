@@ -18,7 +18,7 @@ def binarySearch (arr : Array Nat) (target low high : Nat)
 if hlh : low ≥ high then
   none
 else
-  let mid := (low + high) / 2
+  let mid := low + (high - low) / 2
   have hmid : mid < arr.size := by omega
   if arr[mid] = target then
     some  mid
@@ -42,6 +42,53 @@ set_option linter.hashCommand false in
 #guard binarySearch testArray 0 0 testArray.size (by decide) == none
 set_option linter.hashCommand false in
 #guard binarySearch testArray 7 0 testArray.size (by decide) == some 3
+
+/-- The empty array: `binarySearch` should never find anything in it. -/
+def emptyArray : Array Nat := #[]
+
+set_option linter.hashCommand false in
+#guard binarySearch emptyArray 5 0 emptyArray.size (by decide) == none
+
+/-- A single-element array, to exercise the base case directly. -/
+def singletonArray : Array Nat := #[42]
+
+set_option linter.hashCommand false in
+#guard binarySearch singletonArray 42 0 singletonArray.size (by decide) == some 0
+set_option linter.hashCommand false in
+#guard binarySearch singletonArray 7 0 singletonArray.size (by decide) == none
+
+/-- A two-element array, to exercise both possible found indices and misses on
+either side and in between. -/
+def pairArray : Array Nat := #[10, 20]
+
+set_option linter.hashCommand false in
+#guard binarySearch pairArray 10 0 pairArray.size (by decide) == some 0
+set_option linter.hashCommand false in
+#guard binarySearch pairArray 20 0 pairArray.size (by decide) == some 1
+set_option linter.hashCommand false in
+#guard binarySearch pairArray 15 0 pairArray.size (by decide) == none
+
+/-- A longer array with duplicate runs at both the start and the end (`1, 1`
+and `15, 15`) as well as in the middle, to exercise more search iterations
+and more chances for an off-by-one mistake to show up. -/
+def largeArray : Array Nat := #[1, 1, 3, 4, 4, 4, 6, 8, 8, 10, 12, 15, 15]
+
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 1 0 largeArray.size (by decide) == some 1
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 15 0 largeArray.size (by decide) == some 12
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 4 0 largeArray.size (by decide) == some 3
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 8 0 largeArray.size (by decide) == some 8
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 12 0 largeArray.size (by decide) == some 10
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 0 0 largeArray.size (by decide) == none
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 5 0 largeArray.size (by decide) == none
+set_option linter.hashCommand false in
+#guard binarySearch largeArray 20 0 largeArray.size (by decide) == none
 
 /-- An array is sorted if it is in non-decreasing order. -/
 def Sorted (arr : Array Nat) : Prop :=

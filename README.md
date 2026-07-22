@@ -40,7 +40,7 @@ def binarySearch (arr : Array Nat) (target low high : Nat)
 if hlh : low ≥ high then
   none
 else
-  let mid := (low + high) / 2
+  let mid := low + (high - low) / 2
   have hmid : mid < arr.size := by omega
   if arr[mid] = target then
     some mid
@@ -52,11 +52,11 @@ else
 
 ```cpp
 std::optional<size_t> binary_search(const std::vector<size_t> &arr,
-                                     size_t target) {
+                                    size_t target) {
   size_t low = 0;
   size_t high = arr.size();
   while ((low < high)) {
-    size_t mid = ((low + high) / 2);
+    size_t mid = (low + ((high - low) / 2));
     if ((arr[mid] == target)) {
       return mid;
     } else {
@@ -76,7 +76,7 @@ pub fn binary_search(arr: &[usize], target: usize) -> Option<usize> {
     let mut low: usize = 0;
     let mut high: usize = arr.len();
     while (low < high) {
-        let mut mid: usize = ((low + high) / 2);
+        let mut mid: usize = (low + ((high - low) / 2));
         if (arr[mid] == target) {
             return Some(mid);
         } else {
@@ -93,7 +93,10 @@ pub fn binary_search(arr: &[usize], target: usize) -> Option<usize> {
 
 The C++ and Rust aren't hand-translated, they come from the emitters in this
 repo, and are generated from the same IR that the correctness proof below is
-stated against.
+stated against. Note the midpoint is computed as `low + (high - low) / 2`
+rather than `(low + high) / 2`. This avoids the classic binary-search overflow bug,
+guarded against here because it would actually matter in the fixed-width
+`size_t`/`usize` arithmetic, unlike Lean's arbitrary-precision `Nat`.
 
 ## Pure Lean Version
 
@@ -134,7 +137,7 @@ The Lean implementation is elegant, but it's not easy to directly translate it
 into an efficient C++ or Rust implementation due to the recursion and the proof
 obligations. This part of the project demonstrates how to generate imperative
 code from the same algorithm, and prove *that* matches the reference
-implementation too?
+implementation too.
 
 - **IR** ([`IR.lean`](BinarySearch/IR.lean)) — a tiny imperative language:
   variable declare/assign, `if`, one `while` loop, early return. Just enough
@@ -171,7 +174,7 @@ To help close that remaining gap empirically rather than formally, `make
 test-cpp` and `make test-rust` compile and run the emitted code against the same
 test cases, and CI does this on every push.
 
-## Proofs Narrow the Gap — They Don't Remove It
+## Proofs Narrow the Gap, They Don't Remove It
 
 [`Fake.lean`](BinarySearch/Fake.lean) is a small cautionary tale: `fakeSearch`
 always returns `none`, yet its "correctness theorem" type-checks trivially,
