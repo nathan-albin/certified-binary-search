@@ -78,12 +78,12 @@ theorem innerBlock_step (arr : Array Nat) (target low high mid fuel : Nat)
     obtain ⟨n₄, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₄
     simp [interp, evalExpr, updateState]
 
-theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
+theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = some i) :
-  ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
+  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
   interp (Environment.mk arr target) (State.mk low high mid0)
-  fuel Program.whileBlock = Result.return_index i := by
+  fuel Program.loopBlock = Result.return_index i := by
   induction low, high, hhigh using binarySearch.induct with
   | target => exact target
   | case1 low high hhigh hlh=>
@@ -98,7 +98,7 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
     intro mid0 fuel hfuel
     have hfuel_pos : fuel > 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show fuel ≠ 0 by omega)
-    unfold Program.whileBlock
+    unfold Program.loopBlock
     simp only [interp, evalExpr, ne_eq, ite_eq_right_iff, one_ne_zero, imp_false, not_lt, hlh,
       not_false_eq_true, ↓reduceIte]
     have hn : n ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
@@ -110,7 +110,7 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
     intro mid0 fuel hfuel
     have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
-    unfold Program.whileBlock
+    unfold Program.loopBlock
     simp only [interp, evalExpr, ne_eq, ite_eq_right_iff, one_ne_zero, imp_false, not_lt, hlh,
       not_false_eq_true, ↓reduceIte]
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
@@ -121,7 +121,7 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
@@ -131,7 +131,7 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
     intro mid0 fuel hfuel
     have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
     obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
-    unfold Program.whileBlock
+    unfold Program.loopBlock
     simp only [interp, evalExpr, ne_eq, ite_eq_right_iff, one_ne_zero, imp_false, not_lt, hlh,
       not_false_eq_true, ↓reduceIte]
     have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
@@ -142,11 +142,87 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
     exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+
+theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
+  (hhigh : high ≤ arr.size)
+  (h : binarySearch arr target low high hhigh = none) :
+  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
+  ∃ s, interp (Environment.mk arr target) (State.mk low high mid0)
+  fuel Program.loopBlock = Result.success s := by
+  induction low, high, hhigh using binarySearch.induct with
+  | target => exact target
+  | case1 low high hhigh hlh =>
+    intro mid0 fuel hfuel
+    have hfuel_pos : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+    obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hfuel_pos
+    refine ⟨State.mk low high mid0, ?_⟩
+    unfold Program.loopBlock
+    simp [interp, evalExpr, hlh]
+  | case2 low high hhigh hlh mid hmid htarget =>
+    unfold binarySearch at h
+    dsimp only at h
+    split_ifs at h
+  | case3 low high hhigh hlh mid hmid hne hlt ih =>
+    subst mid
+    intro mid0 fuel hfuel
+    have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+    obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
+    unfold Program.loopBlock
+    simp only [interp, evalExpr, ne_eq, ite_eq_right_iff, one_ne_zero, imp_false, not_lt, hlh,
+      not_false_eq_true, ↓reduceIte]
+    have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+    rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
+    simp only [hne, ↓reduceIte, hlt]
+    have h_upper : binarySearch arr target ((low + high) / 2 + 1) high hhigh = none := by
+      unfold binarySearch at h
+      dsimp only at h
+      split_ifs at h
+      exact h
+    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+      rw [ProgramDriver.fullFuel]
+      rw [ProgramDriver.fullFuel] at hfuel
+      omega
+    exact (ih h_upper ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+  | case4 low high hhigh hlh mid hmid hne hge ih =>
+    subst mid
+    intro mid0 fuel hfuel
+    have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+    obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
+    unfold Program.loopBlock
+    simp only [interp, evalExpr, ne_eq, ite_eq_right_iff, one_ne_zero, imp_false, not_lt, hlh,
+      not_false_eq_true, ↓reduceIte]
+    have hn : n₁ ≥ 4 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+    rw [innerBlock_step arr target low high mid0 n₁ hmid hn]
+    simp only [hne, ↓reduceIte, hge]
+    have h_lower : binarySearch arr target low ((low + high) / 2) hmid.le = none := by
+      unfold binarySearch at h
+      dsimp only at h
+      split_ifs at h
+      exact h
+    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+      rw [ProgramDriver.fullFuel]
+      rw [ProgramDriver.fullFuel] at hfuel
+      omega
+    exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
+
+theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
+  (hhigh : high ≤ arr.size)
+  (h : binarySearch arr target low high hhigh = some i) :
+  ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
+  interp (Environment.mk arr target) (State.mk low high mid0)
+  fuel Program.whileBlock = Result.return_index i := by
+  intro mid0 fuel hfuel
+  rw [ProgramDriver.fullFuel] at hfuel
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show fuel ≠ 0 by omega)
+  unfold Program.whileBlock
+  have hloop := loopBlock_finds arr target low high i hhigh h mid0 n
+    (by rw [ProgramDriver.fullFuel]; omega)
+  simp [interp, hloop]
 
 theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size)
@@ -154,8 +230,24 @@ theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
   ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
   interp (Environment.mk arr target) (State.mk low high mid0)
   fuel Program.whileBlock = Result.return_none := by
-  sorry
-
+  intro mid0 fuel hfuel
+  rw [ProgramDriver.fullFuel] at hfuel
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show fuel ≠ 0 by omega)
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show n ≠ 0 by omega)
+  unfold Program.whileBlock
+  obtain ⟨s, hs⟩ := loopBlock_none arr target low high hhigh h mid0 (k + 1)
+    (by rw [ProgramDriver.fullFuel]; omega)
+  have hseq : interp (Environment.mk arr target) (State.mk low high mid0) (k + 1 + 1)
+      (Program.loopBlock ;; IR.Stmt.return_none) =
+      match interp (Environment.mk arr target) (State.mk low high mid0) (k + 1)
+          Program.loopBlock with
+      | Result.success newState =>
+          interp (Environment.mk arr target) newState (k + 1) IR.Stmt.return_none
+      | Result.return_index i => Result.return_index i
+      | Result.return_none => Result.return_none
+      | Result.out_of_fuel => Result.out_of_fuel := rfl
+  rw [hseq, hs]
+  rfl
 
 theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
   (hhigh : high ≤ arr.size) :
