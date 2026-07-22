@@ -27,6 +27,7 @@ else
   else
     binarySearch arr target low mid hmid.le
 
+/-- Sample sorted array used by the `#guard` sanity checks below. -/
 def testArray : Array Nat := #[1, 3, 5, 7, 7, 9]
 
 set_option linter.hashCommand false in

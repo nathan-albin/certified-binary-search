@@ -16,12 +16,18 @@ open BinarySearch.Interp
 /-! Defines what it means for the program results to match the output of the
 native Lean search -/
 
+/-- The IR result matches the native result iff both found nothing, or both
+found the target at the same index. -/
 def resultsMatch (resultIR : Result) (ResultLean : Option Nat) : Prop :=
   match resultIR, ResultLean with
   | Result.return_index i, some j => i = j
   | Result.return_none, none => True
   | _, _ => False
 
+/-- Running `Program.innerBlock` for one step computes the midpoint and either
+returns its index (if it matches `target`) or narrows the interval towards
+whichever half `target` could be in, exactly mirroring one step of
+`Basic.binarySearch`'s recursion. -/
 theorem innerBlock_step (arr : Array Nat) (target low high mid fuel : Nat)
     (hmid : (low + high) / 2 < arr.size)
     (hfuel : fuel ≥ 4) :
@@ -78,6 +84,9 @@ theorem innerBlock_step (arr : Array Nat) (target low high mid fuel : Nat)
     obtain ⟨n₄, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₄
     simp [interp, evalExpr, updateState]
 
+/-- If `Basic.binarySearch` finds `target` at index `i` on `[low, high)`, then
+`Program.loopBlock`, run from that same interval with any starting midpoint
+and enough fuel, also returns `i`. -/
 theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = some i) :
@@ -148,6 +157,10 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
       omega
     exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
 
+/-- If `Basic.binarySearch` does not find `target` on `[low, high)`, then
+`Program.loopBlock`, run from that same interval with any starting midpoint
+and enough fuel, exits the loop successfully (without ever returning an
+index). -/
 theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = none) :
@@ -210,6 +223,10 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
       omega
     exact (ih h_lower ((low + high) / 2) n₁ ∘ fun a ↦ hfuel_remain) arr
 
+/-- If `Basic.binarySearch` finds `target` at index `i` on `[low, high)`, then
+`Program.whileBlock`, run from that same interval with enough fuel, returns
+`i`. Follows from `loopBlock_finds` by peeling off one layer of fuel for the
+`loopBlock ;; return_none` sequencing. -/
 theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = some i) :
@@ -224,6 +241,10 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
     (by rw [ProgramDriver.fullFuel]; omega)
   simp [interp, hloop]
 
+/-- If `Basic.binarySearch` does not find `target` on `[low, high)`, then
+`Program.whileBlock`, run from that same interval with enough fuel, returns
+`Result.return_none`. Follows from `loopBlock_none` by peeling off one layer
+of fuel for the `loopBlock ;; return_none` sequencing. -/
 theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = none) :
@@ -249,6 +270,9 @@ theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
   rw [hseq, hs]
   rfl
 
+/-- `Program.whileBlock`, run on the interval `[low, high)` with exactly
+`fullFuel low high` fuel, produces a result matching `Basic.binarySearch` on
+that same interval. -/
 theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
   (hhigh : high ≤ arr.size) :
   resultsMatch (interp (Environment.mk arr target) (State.mk low high 0)
@@ -264,6 +288,9 @@ theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
       (ProgramDriver.fullFuel low high) (by omega)
     simp [hwhile, resultsMatch]
 
+/-- `Program.initBlock` always resets the interval to the whole array
+(`low := 0`, `high := arr.size`), regardless of the state it started from, and
+leaves `mid` untouched. -/
 theorem initBlock_effect (arr : Array Nat) (target low high mid : Nat) (n : Nat)
     (hn : n ≥ 2) :
     interp (Environment.mk arr target) (State.mk low high mid) n Program.initBlock =
@@ -274,7 +301,10 @@ theorem initBlock_effect (arr : Array Nat) (target low high mid : Nat) (n : Nat)
   obtain ⟨n₂, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show n₁ ≠ 0 by omega)
   simp [interp, evalExpr, updateState]
 
-/- Show how the initialization block affects the output -/
+/-- Running the full program `Program.binarySearchIR` (which first resets the
+interval to the whole array via `initBlock`, then searches) agrees with
+running `Program.whileBlock` directly on the whole-array interval, for any
+shared amount of fuel large enough to search the whole array. -/
 theorem whileBlock_of_binarySearchIR
   (arr : Array Nat) (target : Nat) :
   ∀ fuel, fuel ≥ ProgramDriver.fullFuel 0 arr.size →
@@ -305,8 +335,8 @@ theorem whileBlock_of_binarySearchIR
           (by rw [ProgramDriver.fullFuel] at hfuel ⊢; omega),
         whileBlock_none arr target 0 arr.size arr.size.le_refl h 0 (n₁+1) (by omega)]
 
-/-! The main theorem: the binary search IR implementation produces the same
-result as the native Lean implementation -/
+/-- The main theorem: the binary search IR implementation produces the same
+result as the native Lean implementation. -/
 theorem binarySearch_correct (arr : Array Nat) (target : Nat) :
   resultsMatch (BinarySearch.ProgramDriver.binarySearch arr target)
     (binarySearch arr target 0 arr.size arr.size.le_refl) := by

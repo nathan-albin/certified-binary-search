@@ -7,6 +7,7 @@ namespace BinarySearch.ProgramTest
 
 open BinarySearch.ProgramDriver open BinarySearch.Interp
 
+/-- Sample sorted array used by the `#guard` sanity checks below. -/
 def testArray : Array Nat := #[1, 3, 5, 7, 7, 9]
 
 #guard binarySearch testArray 5 == Result.return_index 2

@@ -6,6 +6,7 @@ namespace BinarySearch.EmitCpp
 
 open BinarySearch.IR.Expr BinarySearch.IR.Stmt BinarySearch.IR.Var
 
+/-- Renders an IR expression as a C++ expression. -/
 def emitExpr : IR.Expr → String
   | var low => "low"
   | var high => "high"
@@ -19,11 +20,13 @@ def emitExpr : IR.Expr → String
   | less_than e1 e2 => "(" ++ (emitExpr e1) ++ " < " ++ (emitExpr e2) ++ ")"
   | equal e1 e2 => "(" ++ (emitExpr e1) ++ " == " ++ (emitExpr e2) ++ ")"
 
+/-- Renders an IR variable as the name of its C++ counterpart. -/
 def emitVar : IR.Var → String
   | low => "low"
   | high => "high"
   | mid => "mid"
 
+/-- Renders an IR statement as a block of C++ statements. -/
 def emitStmt : IR.Stmt → String
   | declare v expr => "size_t " ++ (emitVar v) ++ " = " ++ (emitExpr expr) ++ ";\n"
   | assign v expr => (emitVar v) ++ " = " ++ (emitExpr expr) ++ ";\n"

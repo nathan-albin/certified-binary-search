@@ -13,6 +13,8 @@ logarithmic complexity, this is far more than is necessary in general. -/
 def fullFuel (low high : Nat) : Nat :=
   10 * (high - low) + 10
 
+/-- Runs the IR binary search program on `arr` looking for `target`, over the
+whole array, with enough fuel (`fullFuel 0 arr.size`) to always finish. -/
 def binarySearch (arr : Array Nat) (target : Nat) : Result :=
   let env := Environment.mk arr target
   let state := State.mk 0 0 0

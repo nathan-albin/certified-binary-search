@@ -6,6 +6,7 @@ namespace BinarySearch.EmitRust
 
 open BinarySearch.IR.Expr BinarySearch.IR.Stmt BinarySearch.IR.Var
 
+/-- Renders an IR expression as a Rust expression. -/
 def emitExpr : IR.Expr → String
   | var low => "low"
   | var high => "high"
@@ -19,14 +20,17 @@ def emitExpr : IR.Expr → String
   | less_than e1 e2 => "(" ++ (emitExpr e1) ++ " < " ++ (emitExpr e2) ++ ")"
   | equal e1 e2 => "(" ++ (emitExpr e1) ++ " == " ++ (emitExpr e2) ++ ")"
 
+/-- Renders an IR variable as the name of its Rust counterpart. -/
 def emitVar : IR.Var → String
   | low => "low"
   | high => "high"
   | mid => "mid"
 
--- `low`/`high`/`mid` are declared once (with `mut`, since every one of them gets
--- reassigned later) and only ever plainly reassigned after that - see `declare`
--- vs `assign` below. No variable needs a fresh `let` per loop iteration.
+/-- Renders an IR statement as a block of Rust statements.
+
+`low`/`high`/`mid` are declared once (with `mut`, since every one of them gets
+reassigned later) and only ever plainly reassigned after that - see `declare`
+vs `assign` below. No variable needs a fresh `let` per loop iteration. -/
 def emitStmt : IR.Stmt → String
   | declare v expr => "let mut " ++ (emitVar v) ++ ": usize = " ++ (emitExpr expr) ++ ";\n"
   | assign v expr => (emitVar v) ++ " = " ++ (emitExpr expr) ++ ";\n"
