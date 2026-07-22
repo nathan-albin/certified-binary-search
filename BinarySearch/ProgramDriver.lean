@@ -8,9 +8,11 @@ namespace BinarySearch.ProgramDriver
 
 open  BinarySearch.Interp BinarySearch.Program
 
+private def C : Nat := 10
+
 def binarySearch (arr : Array Nat) (target : Nat) (low high : Nat) : Result :=
   let env := Environment.mk arr target
   let state := State.mk low high 0
-  interp env state (10*arr.size) binarySearchIR
+  interp env state (C*(high - low) + C) binarySearchIR
 
 end BinarySearch.ProgramDriver
