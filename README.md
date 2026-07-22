@@ -105,10 +105,6 @@ def binarySearch (arr : Array Nat) (target low high : Nat)
 Searches `arr[low, high)` for `target`: `some i` if found at index `i`,
 `none` otherwise.
 
-> [!IMPORTANT]
-> The search itself doesn't require a sorted array, but the correctness proof
-> does. On an unsorted array it may simply miss the target.
-
 Two theorems carry the correctness argument:
 
 ```lean
