@@ -1,0 +1,25 @@
+{
+  "name": "Certified Binary Search (Lean + C++ + Rust)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "profile": "default",
+      "version": "stable"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "leanprover.lean4",
+        "rust-lang.rust-analyzer",
+        "ms-vscode.cpptools",
+        "vadimcn.vscode-lldb"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}
