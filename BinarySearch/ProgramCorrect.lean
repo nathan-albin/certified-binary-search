@@ -264,11 +264,45 @@ theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
       (ProgramDriver.fullFuel low high) (by omega)
     simp [hwhile, resultsMatch]
 
+/- Show how the initialization block affects the output -/
+theorem whileBlock_of_binarySearchIR
+  (arr : Array Nat) (target : Nat) :
+  ∀ fuel, fuel ≥ ProgramDriver.fullFuel 0 arr.size →
+  interp (Environment.mk arr target) (State.mk 0 0 0) fuel
+    Program.binarySearchIR =
+  interp (Environment.mk arr target) (State.mk 0 arr.size 0) fuel
+    Program.whileBlock := by
+  intro fuel hfuel
+  have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
+  obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
+  unfold Program.binarySearchIR
+  sorry
+
+theorem initBlock_effect (arr : Array Nat) (target : Nat) :
+  ∀ (env : Environment) (state : State) (fuel : Nat) (stmt : IR.Stmt),
+  fuel ≥ 2 → interp env state fuel (Program.initBlock ;; stmt ) =
+  interp env (State.mk 0 arr.size state.mid) (fuel - 2) stmt := by
+  sorry
+
 /-! The main theorem: the binary search IR implementation produces the same
 result as the native Lean implementation -/
-theorem binarySearch_correct (arr : Array Nat) (target : Nat) (hsorted : Sorted arr) :
+theorem binarySearch_correct (arr : Array Nat) (target : Nat) :
   resultsMatch (BinarySearch.ProgramDriver.binarySearch arr target)
     (binarySearch arr target 0 arr.size arr.size.le_refl) := by
-  sorry
+  cases h : binarySearch arr target 0 arr.size arr.size.le_refl with
+  | some i =>
+    have hwhile := whileBlock_finds arr target 0 arr.size i arr.size.le_refl h 0
+      (ProgramDriver.fullFuel 0 arr.size) (by omega)
+    simp only [resultsMatch]
+    unfold ProgramDriver.binarySearch
+    rw [whileBlock_of_binarySearchIR arr target (ProgramDriver.fullFuel 0 arr.size) (by omega)]
+    simp [hwhile]
+  | none =>
+    have hwhile := whileBlock_none arr target 0 arr.size arr.size.le_refl h 0
+      (ProgramDriver.fullFuel 0 arr.size) (by omega)
+    simp only [resultsMatch]
+    unfold ProgramDriver.binarySearch
+    rw [whileBlock_of_binarySearchIR arr target (ProgramDriver.fullFuel 0 arr.size) (by omega)]
+    simp [hwhile]
 
 end BinarySearch.ProgramCorrect
