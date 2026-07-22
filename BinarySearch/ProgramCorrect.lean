@@ -23,10 +23,9 @@ def resultsMatch (resultIR : Result) (ResultLean : Option Nat) : Prop :=
 
 /-! The main theorem: the binary search IR implementation produces the same
 result as the native Lean implementation -/
-theorem binarySearch_correct (arr : Array Nat) (target low high : Nat)
-  (hhigh : high ≤ arr.size) (hsorted : Sorted arr) :
-  resultsMatch (BinarySearch.ProgramDriver.binarySearch arr target low high)
-    (binarySearch arr target low high hhigh) := by
+theorem binarySearch_correct (arr : Array Nat) (target : Nat) (hsorted : Sorted arr) :
+  resultsMatch (BinarySearch.ProgramDriver.binarySearch arr target)
+    (binarySearch arr target 0 arr.size arr.size.le_refl) := by
   sorry
 
 end BinarySearch.ProgramCorrect
