@@ -19,6 +19,7 @@ inductive Expr where
   | equal : Expr → Expr → Expr
 
 inductive Stmt where
+  | declare : Var → Expr → Stmt
   | assign : Var → Expr → Stmt
   | if_then : Expr → Stmt → Stmt → Stmt
   | while_do : Expr → Stmt → Stmt

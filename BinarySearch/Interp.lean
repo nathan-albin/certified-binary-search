@@ -10,7 +10,7 @@ structure State where
   low : Nat
   high : Nat
   mid : Nat
-  deriving BEq
+  deriving BEq, Repr
 
 structure Environment where
   arr : Array Nat
@@ -21,7 +21,7 @@ inductive Result where
   | return_index (i : Nat) : Result
   | return_none : Result
   | out_of_fuel : Result
-  deriving BEq
+  deriving BEq, Repr
 
 def evalExpr (env : Environment) (state : State) : IR.Expr → Nat
   | var low => state.low
@@ -46,6 +46,10 @@ def interp (env : Environment) (state : State) : Nat → IR.Stmt → Result
   | 0, _ => Result.out_of_fuel
   | n+1, stmt =>
     match stmt with
+    | declare v expr =>
+        let value := evalExpr env state expr
+        let newState := updateState state v value
+        Result.success newState
     | assign v expr =>
         let value := evalExpr env state expr
         let newState := updateState state v value
