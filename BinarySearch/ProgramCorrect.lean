@@ -81,7 +81,7 @@ theorem innerBlock_step (arr : Array Nat) (target low high mid fuel : Nat)
 theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = some i) :
-  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
+  ∀ mid0 fuel, fuel + 2 ≥ ProgramDriver.fullFuel low high →
   interp (Environment.mk arr target) (State.mk low high mid0)
   fuel Program.loopBlock = Result.return_index i := by
   induction low, high, hhigh using binarySearch.induct with
@@ -121,7 +121,7 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
@@ -142,7 +142,7 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
@@ -151,7 +151,7 @@ theorem loopBlock_finds (arr : Array Nat) (target low high i : Nat)
 theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = none) :
-  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
+  ∀ mid0 fuel, fuel + 2 ≥ ProgramDriver.fullFuel low high →
   ∃ s, interp (Environment.mk arr target) (State.mk low high mid0)
   fuel Program.loopBlock = Result.success s := by
   induction low, high, hhigh using binarySearch.induct with
@@ -183,7 +183,7 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel ((low + high) / 2 + 1) high := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
@@ -204,7 +204,7 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
       dsimp only at h
       split_ifs at h
       exact h
-    have hfuel_remain : n₁ + 1 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
+    have hfuel_remain : n₁ + 2 ≥ ProgramDriver.fullFuel low ((low + high) / 2) := by
       rw [ProgramDriver.fullFuel]
       rw [ProgramDriver.fullFuel] at hfuel
       omega
@@ -213,7 +213,7 @@ theorem loopBlock_none (arr : Array Nat) (target low high : Nat)
 theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = some i) :
-  ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
+  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
   interp (Environment.mk arr target) (State.mk low high mid0)
   fuel Program.whileBlock = Result.return_index i := by
   intro mid0 fuel hfuel
@@ -227,7 +227,7 @@ theorem whileBlock_finds (arr : Array Nat) (target low high i : Nat)
 theorem whileBlock_none (arr : Array Nat) (target low high : Nat)
   (hhigh : high ≤ arr.size)
   (h : binarySearch arr target low high hhigh = none) :
-  ∀ mid0 fuel, fuel ≥ ProgramDriver.fullFuel low high →
+  ∀ mid0 fuel, fuel + 1 ≥ ProgramDriver.fullFuel low high →
   interp (Environment.mk arr target) (State.mk low high mid0)
   fuel Program.whileBlock = Result.return_none := by
   intro mid0 fuel hfuel
@@ -264,6 +264,16 @@ theorem whileBlock_correct (arr : Array Nat) (target : Nat) (low high : Nat)
       (ProgramDriver.fullFuel low high) (by omega)
     simp [hwhile, resultsMatch]
 
+theorem initBlock_effect (arr : Array Nat) (target low high mid : Nat) (n : Nat)
+    (hn : n ≥ 2) :
+    interp (Environment.mk arr target) (State.mk low high mid) n Program.initBlock =
+      Result.success (State.mk 0 arr.size mid) := by
+  obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show n ≠ 0 by omega)
+  unfold Program.initBlock
+  simp only [interp]
+  obtain ⟨n₂, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (show n₁ ≠ 0 by omega)
+  simp [interp, evalExpr, updateState]
+
 /- Show how the initialization block affects the output -/
 theorem whileBlock_of_binarySearchIR
   (arr : Array Nat) (target : Nat) :
@@ -275,8 +285,25 @@ theorem whileBlock_of_binarySearchIR
   intro fuel hfuel
   have hn₁ : fuel ≠ 0 := by rw [ProgramDriver.fullFuel] at hfuel; omega
   obtain ⟨n₁, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn₁
-  unfold Program.binarySearchIR
-  sorry
+  have hseq : interp (Environment.mk arr target) (State.mk 0 0 0) (n₁ + 1)
+      Program.binarySearchIR =
+      match interp (Environment.mk arr target) (State.mk 0 0 0) n₁ Program.initBlock with
+      | Result.success newState =>
+          interp (Environment.mk arr target) newState n₁ Program.whileBlock
+      | Result.return_index i => Result.return_index i
+      | Result.return_none => Result.return_none
+      | Result.out_of_fuel => Result.out_of_fuel := rfl
+  rw [hseq, initBlock_effect arr target 0 0 0 n₁ (by rw [ProgramDriver.fullFuel] at hfuel; omega)]
+  simp only
+  cases h : binarySearch arr target 0 arr.size arr.size.le_refl with
+  | some i =>
+    rw [whileBlock_finds arr target 0 arr.size i arr.size.le_refl h 0 n₁
+          (by rw [ProgramDriver.fullFuel] at hfuel ⊢; omega),
+        whileBlock_finds arr target 0 arr.size i arr.size.le_refl h 0 (n₁+1) (by omega)]
+  | none =>
+    rw [whileBlock_none arr target 0 arr.size arr.size.le_refl h 0 n₁
+          (by rw [ProgramDriver.fullFuel] at hfuel ⊢; omega),
+        whileBlock_none arr target 0 arr.size arr.size.le_refl h 0 (n₁+1) (by omega)]
 
 /-! The main theorem: the binary search IR implementation produces the same
 result as the native Lean implementation -/
