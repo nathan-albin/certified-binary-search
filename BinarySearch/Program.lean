@@ -21,9 +21,12 @@ def innerBlock : IR.Stmt :=
     (return_index (var mid))
     (splitBlock)
 
+def whileBlock : IR.Stmt :=
+  while_do (less_than (var low) (var high)) innerBlock
+
 def binarySearchIR : IR.Stmt :=
   initBlock ;;
-  while_do (less_than (var low) (var high)) innerBlock ;;
+  whileBlock ;;
   return_none
 
 end BinarySearch.Program
