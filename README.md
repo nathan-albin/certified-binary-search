@@ -16,16 +16,16 @@ this).
 
 ## What's Here
 
-- **Pure Lean implementation and proof** — [`Basic.lean`](BinarySearch/Basic.lean)
-- **A cautionary non-example** — [`Fake.lean`](BinarySearch/Fake.lean): an
+- **Pure Lean implementation and proof**: [`Basic.lean`](BinarySearch/Basic.lean)
+- **A cautionary non-example**: [`Fake.lean`](BinarySearch/Fake.lean): an
   incorrect search with a theorem that merely *looks* like a correctness proof
-- **A small imperative IR** — [`IR.lean`](BinarySearch/IR.lean),
+- **A small imperative IR**: [`IR.lean`](BinarySearch/IR.lean),
   [`Interp.lean`](BinarySearch/Interp.lean), [`Program.lean`](BinarySearch/Program.lean)
-- **Code emitters** (IR → C++ / Rust) —
+- **Code emitters** (IR → C++ / Rust):
   [`EmitCpp.lean`](BinarySearch/EmitCpp.lean) / [`EmitCppProgram.lean`](BinarySearch/EmitCppProgram.lean),
   [`EmitRust.lean`](BinarySearch/EmitRust.lean) / [`EmitRustProgram.lean`](BinarySearch/EmitRustProgram.lean)
-- **Proof that the IR matches the Lean implementation** — [`ProgramCorrect.lean`](BinarySearch/ProgramCorrect.lean)
-- **Generated code plus handwritten tests**, compiled and run in CI —
+- **Proof that the IR matches the Lean implementation**: [`ProgramCorrect.lean`](BinarySearch/ProgramCorrect.lean)
+- **Generated code plus handwritten tests**, compiled and run in CI:
   [`emit/cpp`](emit/cpp), [`emit/rust`](emit/rust)
 
 ## Preview
