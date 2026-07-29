@@ -158,21 +158,20 @@ obligations. This part of the project demonstrates how to generate imperative
 code from the same algorithm, and prove *that* matches the reference
 implementation too.
 
-- **IR** ([`IR.lean`](BinarySearch/IR.lean)) — a tiny imperative language:
+- **IR** ([`IR.lean`](BinarySearch/IR.lean)): a tiny imperative language:
   variable declare/assign, `if`, one `while` loop, early return. It's not a general-purpose language. It's not even a very good language. The interesting thing here is that we don't need to reason about all possible programs expressible in the IR, we just need it for this one program.
-- **Interpreter** ([`Interp.lean`](BinarySearch/Interp.lean)) — a fuel-bounded
+- **Interpreter** ([`Interp.lean`](BinarySearch/Interp.lean)): a fuel-bounded
   evaluator for the IR. This encodes the IR semantics. When we reason about the IR program, we do it through the interpreter.
 - **Program** ([`Program.lean`](BinarySearch/Program.lean),
-  [`ProgramDriver.lean`](BinarySearch/ProgramDriver.lean)) — binary search
+  [`ProgramDriver.lean`](BinarySearch/ProgramDriver.lean)): binary search
   assembled from IR statements. This is the _only_ program in the IR that we reason about.
 - **Emitters** ([`EmitCpp.lean`](BinarySearch/EmitCpp.lean) /
   [`EmitCppProgram.lean`](BinarySearch/EmitCppProgram.lean),
   [`EmitRust.lean`](BinarySearch/EmitRust.lean) /
-  [`EmitRustProgram.lean`](BinarySearch/EmitRustProgram.lean)) — pretty-print
+  [`EmitRustProgram.lean`](BinarySearch/EmitRustProgram.lean)): pretty-print
   the IR plus some scaffolding to C++ and Rust source. The snippets in the
   preview above come directly from the emitters.
-- **Correctness proof** ([`ProgramCorrect.lean`](BinarySearch/ProgramCorrect.lean))
-  — `binarySearch_correct` ties it together:
+- **Correctness proof** ([`ProgramCorrect.lean`](BinarySearch/ProgramCorrect.lean)): `binarySearch_correct` ties it together:
 
   ```lean
   theorem binarySearch_correct (arr : Array Nat) (target : Nat) :
